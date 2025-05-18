@@ -49,9 +49,14 @@ class MainActivity : AppCompatActivity() {
     private fun initViews() {
         with(binding) {
             btnAddProduct.setOnClickListener {
-
+                intentToModify()
             }
         }
+    }
+
+    private fun intentToModify() {
+        val intent = Intent(this@MainActivity, ModifyProductActivity::class.java)
+        startActivity(intent)
     }
 
     private fun loadProduct() {

@@ -15,6 +15,9 @@
         android:theme="@style/Theme.P9_androidBeginer_CRUD"
         tools:targetApi="31">
         <activity
+            android:name=".ui.ModifyProductActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.DetailActivity"
             android:exported="false" />
         <activity
