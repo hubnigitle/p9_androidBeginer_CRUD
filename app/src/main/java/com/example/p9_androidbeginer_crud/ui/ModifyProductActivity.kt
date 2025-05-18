@@ -1,5 +1,6 @@
 package com.example.p9_androidbeginer_crud.ui
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -11,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.p9_androidbeginer_crud.Api.RetrofitClient
 import com.example.p9_androidbeginer_crud.Models.CreateUpdateProductRequest
 import com.example.p9_androidbeginer_crud.Models.CreateUpdateProductResponse
+import com.example.p9_androidbeginer_crud.Models.ProductsItem
 import com.example.p9_androidbeginer_crud.R
 import com.example.p9_androidbeginer_crud.databinding.ActivityModifyProductBinding
 import retrofit2.Call
@@ -20,9 +22,13 @@ import retrofit2.Response
 class ModifyProductActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityModifyProductBinding
+    private var product: ProductsItem? = null
+    private var isUpdate = false
 
     companion object {
         private const val TAG = "ModifyProductActivity"
+        const val EXTRA_PRODUCT = "extra_product"
+        const val SOURCE_INTENT = "source_intent"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,14 +51,79 @@ class ModifyProductActivity : AppCompatActivity() {
                 finish()
             }
 
-            toolbar.setTitle(getString(R.string.add_product))
-            btnSave.text = getString(R.string.add_product)
-            btnDelete.visibility = View.GONE
+            isUpdate = intent.getBooleanExtra(SOURCE_INTENT, false)
 
-            btnSave.setOnClickListener {
-                addProduct()
+            if (isUpdate == true) {
+
+                product = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra(EXTRA_PRODUCT, ProductsItem::class.java)
+                } else {
+                    intent.getParcelableExtra(EXTRA_PRODUCT)
+                }
+
+                toolbar.setTitle(getString(R.string.modify_product))
+
+                tietProductName.setText(product?.title)
+                tietProductPrice.setText(product?.price.toString())
+                tietProductDesc.setText(product?.description)
+
+                btnSave.text = getString(R.string.modify_product)
+                btnDelete.visibility = View.VISIBLE
+
+                btnSave.setOnClickListener {
+                    updateProduct()
+                }
+            } else {
+                toolbar.setTitle(getString(R.string.add_product))
+                btnSave.text = getString(R.string.add_product)
+                btnDelete.visibility = View.GONE
+
+                btnSave.setOnClickListener {
+                    addProduct()
+                }
             }
+
         }
+    }
+
+    private fun updateProduct() {
+        val productName = binding.tietProductName.text.toString().trim()
+        val productPrice = binding.tietProductPrice.text.toString().trim()
+        val productDesc = binding.tietProductDesc.text.toString().trim()
+        val productId = product?.id ?: 0
+
+        if (productName.isEmpty() || productPrice.isEmpty() || productDesc.isEmpty()) {
+            Toast.makeText(this, "Semua field harus diisi", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        RetrofitClient.instance.updateProduct(
+            product = CreateUpdateProductRequest(
+                title = productName,
+                price = productPrice.toDouble(),
+                description = productDesc
+            ),
+            id = productId
+        ).enqueue(object: Callback<CreateUpdateProductResponse>{
+            override fun onResponse(
+                call: Call<CreateUpdateProductResponse>,
+                response: Response<CreateUpdateProductResponse>
+            ) {
+                if (response.isSuccessful) {
+                    Log.d(TAG, "onResponse: ${response.body()}")
+                    Toast.makeText(this@ModifyProductActivity, "Product berhasil diubah", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else {
+                    Log.d(TAG, "onResponse: ${response.body()}")
+                    Toast.makeText(this@ModifyProductActivity, "Product gagal diubah", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<CreateUpdateProductResponse>, t: Throwable) {
+                Log.d(TAG, "onFailure: ${t.message}")
+                Toast.makeText(this@ModifyProductActivity, "Product gagal diubah", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     private fun addProduct() {

@@ -49,13 +49,16 @@ class MainActivity : AppCompatActivity() {
     private fun initViews() {
         with(binding) {
             btnAddProduct.setOnClickListener {
-                intentToModify()
+                intentToModify(product = null, sourceIntent = false)
             }
         }
     }
 
-    private fun intentToModify() {
-        val intent = Intent(this@MainActivity, ModifyProductActivity::class.java)
+    private fun intentToModify(product: ProductsItem?, sourceIntent: Boolean) {
+        val intent = Intent(this@MainActivity, ModifyProductActivity::class.java).apply {
+            putExtra(ModifyProductActivity.EXTRA_PRODUCT, product)
+            putExtra(ModifyProductActivity.SOURCE_INTENT, sourceIntent)
+        }
         startActivity(intent)
     }
 
@@ -75,7 +78,7 @@ class MainActivity : AppCompatActivity() {
                             productAdapter = RvProductAdapter(
                                 listProduct = listProduct,
                                 onItemClick = { intentToDetail(product = it) },
-                                onHoldItemClick = { }
+                                onHoldItemClick = { intentToModify(product = it, sourceIntent = true) }
                             )
 
                             rvProduct.apply {
@@ -101,4 +104,5 @@ class MainActivity : AppCompatActivity() {
         }
         startActivity(intent)
     }
+
 }
