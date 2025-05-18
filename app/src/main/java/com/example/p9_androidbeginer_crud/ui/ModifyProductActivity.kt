@@ -12,6 +12,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.p9_androidbeginer_crud.Api.RetrofitClient
 import com.example.p9_androidbeginer_crud.Models.CreateUpdateProductRequest
 import com.example.p9_androidbeginer_crud.Models.CreateUpdateProductResponse
+import com.example.p9_androidbeginer_crud.Models.DeleteProductResponse
 import com.example.p9_androidbeginer_crud.Models.ProductsItem
 import com.example.p9_androidbeginer_crud.R
 import com.example.p9_androidbeginer_crud.databinding.ActivityModifyProductBinding
@@ -23,7 +24,6 @@ class ModifyProductActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityModifyProductBinding
     private var product: ProductsItem? = null
-    private var isUpdate = false
 
     companion object {
         private const val TAG = "ModifyProductActivity"
@@ -51,9 +51,7 @@ class ModifyProductActivity : AppCompatActivity() {
                 finish()
             }
 
-            isUpdate = intent.getBooleanExtra(SOURCE_INTENT, false)
-
-            if (isUpdate == true) {
+            if (intent.getBooleanExtra(SOURCE_INTENT, false)) {
 
                 product = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     intent.getParcelableExtra(EXTRA_PRODUCT, ProductsItem::class.java)
@@ -72,6 +70,10 @@ class ModifyProductActivity : AppCompatActivity() {
 
                 btnSave.setOnClickListener {
                     updateProduct()
+                }
+
+                btnDelete.setOnClickListener {
+                    deleteProduct(product?.id ?: 0)
                 }
             } else {
                 toolbar.setTitle(getString(R.string.add_product))
@@ -160,6 +162,29 @@ class ModifyProductActivity : AppCompatActivity() {
             override fun onFailure(call: Call<CreateUpdateProductResponse>, t: Throwable) {
                 Log.d(TAG, "onFailure: ${t.message}")
                 Toast.makeText(this@ModifyProductActivity, "Product gagal ditambahkan", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun deleteProduct(idProduct: Int) {
+        RetrofitClient.instance.deleteProduct(id = idProduct).enqueue(object: Callback<DeleteProductResponse>{
+            override fun onResponse(
+                call: Call<DeleteProductResponse>,
+                response: Response<DeleteProductResponse>
+            ) {
+                if (response.isSuccessful) {
+                    Log.d(TAG, "onResponse: ${response.body()}")
+                    Toast.makeText(this@ModifyProductActivity, "Product berhasil dihapus", Toast.LENGTH_SHORT).show()
+                    finish()
+                } else {
+                    Log.d(TAG, "onResponse: ${response.body()}")
+                    Toast.makeText(this@ModifyProductActivity, "Product gagal dihapus", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<DeleteProductResponse>, t: Throwable) {
+                Log.d(TAG, "onFailure: ${t.message}")
+                Toast.makeText(this@ModifyProductActivity, "Product gagal dihapus", Toast.LENGTH_SHORT).show()
             }
         })
     }
