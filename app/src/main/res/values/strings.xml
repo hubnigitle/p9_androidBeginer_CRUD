@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Pertemuan9</string>
+    <string name="add_product">Tambah Produk</string>
+    <string name="modify_product">Ubah Produk</string>
+    <string name="description">Deskripsi</string>
+    <string name="product_price">Harga Produk</string>
+    <string name="product_name">Nama Produk</string>
+    <string name="product_description">Deskripsi Produk</string>
+    <string name="add_more_product">Tambahkan Produk</string>
+    <string name="price">Harga</string>
+    <string name="hint_product_desc">Tulis Deskripsi Produk…</string>
+    <string name="save">Simpan</string>
+    <string name="delete_product">Hapus Produk</string>
+</resources>
